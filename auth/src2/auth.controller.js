@@ -25,12 +25,14 @@ class AuthController {
 
   async login(req, res, next) {
     try {
-      const {email,password} = await validateDto(loginSchema, req.body);
-     
-    const { refreshToken, ...result } = await AuthService.login(email, password);
+      const { email, password } = await validateDto(loginSchema, req.body);
+
+      const { refreshToken, ...result } = await AuthService.login(email, password);
 
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
       res.status(200).json(result);
@@ -39,15 +41,39 @@ class AuthController {
     }
   }
 
-
-  
   async refresh(req, res, next) {
-   
+    try {
+      const { refreshToken } = req.cookies;
+
+      if (!refreshToken) {
+        return res.status(401).json({ message: "Refresh tokena erişilemedi" });
+      }
+
+      const { accessToken, refreshToken: newRefreshToken } =
+        await AuthService.refresh(refreshToken);
+
+      res.cookie("refreshToken", newRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      return res.status(200).json({ accessToken });
+    } catch (error) {
+      next(error);
+    }
   }
 
-  async logout(req, res, next) {
-   
-}
+  async logout(req, res) { 
+  res.clearCookie("refreshToken");
+  res.json({message:"Logged out successfully"})
+    
+  }
+
+   async getProfile(req, res, next) {
+    res.json(req.user);
+  }
 }
 
 module.exports = new AuthController();

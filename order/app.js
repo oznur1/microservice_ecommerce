@@ -4,7 +4,7 @@ const cors = require("cors");
 const morgan = require("morgan");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
-const orderRoutes = require("./src2/order.routes");
+const orderRoutes = require("./src/order.routes");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
 

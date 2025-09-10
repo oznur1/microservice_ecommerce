@@ -18,19 +18,6 @@ mongoose
   .then(() => console.log("✅ MongoDB'ye bağlandı"))
   .catch((err) => console.error("❌ MongoDB bağlantı hatası", err));
 
-// rabbitmq'ya bağlan
-async function connectRabbitMQ() {
-  try {
-    const connection = await amqp.connect(process.env.RABBITMQ_URI || "amqp://localhost");
-    const channel = await connection.createChannel();
-    console.log("✅ RabbitMQ'ya bağlandı");
-    return channel;
-  } catch (error) {
-    console.error("❌ RabbitMQ bağlantı hatası:", error);
-  }
-}
-
-connectRabbitMQ();
 
 // middleware
 app.use(express.json());
@@ -47,7 +34,7 @@ const limiter = rateLimit({
 app.use("/", limiter);
 
 // route
-app.use("/auth", authRoutes);
+app.use("/", authRoutes);
 
 // hata middleware'i
 app.use((err, req, res, next) => {
