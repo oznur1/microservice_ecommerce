@@ -59,8 +59,44 @@ class AuthService {
     return { user, ...tokens };
   }
 
-  static async login(userData) {
-    // TODO: login mantığı
+
+
+
+  static async login(email,password) {
+    try{
+      /// Kullanıcı var mı?
+      const user = await User.findOne({ email });
+      if (!user) throw new Error("Kullanıcı bulunamadı");
+
+
+      //kullanıcı hesabı aktif mi
+      if(!user.isActive){
+        throw new Error("Kullanıcı hesabı aktif")
+      }
+
+
+      // Şifre doğru mu?
+      const isValid = await user.comparePassword(password)
+      if(!isValid){
+        throw new Error("giriş bilgileriniz yanlış")
+      }
+      
+
+      // son giriş tarıhnı güncelle
+    user.lastLogin=new Date();
+    await user.save()
+
+
+      // tokenları oluştur
+      const tokens=this.generateToken(user)
+
+      // verileri return et
+     return{tokens,user}
+      
+      }catch(error){
+      console.log(error);
+      throw error;
+    }
   }
 
   static async refresh(token) {

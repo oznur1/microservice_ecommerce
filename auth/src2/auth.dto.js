@@ -13,15 +13,20 @@ const loginSchema = Joi.object({
   password: Joi.string().min(6).required(),
 });
 
-function validateDto(schema, data) {
+async function validateDto(schema, data) {
   const { error, value } = schema.validate(data, { abortEarly: false });
 
   if (error) {
-    const messages = error.details.map((detail) => detail.message).join(", ");
+    const messages = error.details.map((detail) => detail.message).join(",");
+
     throw new Error(messages);
   }
 
   return value;
 }
 
-module.exports = { registerSchema, loginSchema, validateDto };
+module.exports = {
+  validateDto,
+  loginSchema,
+  registerSchema,
+};
